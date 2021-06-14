@@ -1,11 +1,9 @@
 package br.com.alura.ecommerce;
 
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -14,29 +12,19 @@ import java.util.Properties;
 public class FraudDetectorService {
 
     public static void main(String[] args) {
-        var consumer = new KafkaConsumer<String, String>(properties());
-        consumer.subscribe(Arrays.asList(NewOrderMain.topic_ecommerce_new_order));
-        while(true) {
-            var records = consumer.poll(Duration.ofMillis(100));
+        var fraudService = new FraudDetectorService();
 
-            if (records.isEmpty()) {
-                System.out.println("Sem registros");
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                continue;
-            }
+        var kafkaService = new KafkaService(FraudDetectorService.class.getSimpleName(), KafkaService.topic_ecommerce_new_order, fraudService::parse);
+        kafkaService.run();
 
-            for (var record : records) {
-                System.out.println("====================");
-                System.out.println("Record: " + record.key() + ">> timestamp " + record.timestamp());
-                System.out.println("Processing new order...");
-                System.out.println("Checking for fraud");
-                System.out.println("Order processed");
-            }
-        }
+    }
+
+    private void parse(ConsumerRecord<String, String> record){
+        System.out.println("====================");
+        System.out.println("Record: " + record.key() + ">> timestamp " + record.timestamp());
+        System.out.println("Processing new order...");
+        System.out.println("Checking for fraud");
+        System.out.println("Order processed");
     }
 
     private static Properties properties() {
