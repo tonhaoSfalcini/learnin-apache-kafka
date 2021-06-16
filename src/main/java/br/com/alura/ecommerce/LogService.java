@@ -1,9 +1,7 @@
 package br.com.alura.ecommerce;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 
-import java.time.Duration;
 import java.util.regex.Pattern;
 
 public class LogService {
@@ -11,7 +9,9 @@ public class LogService {
     public static void main(String[] args) {
         var logService = new LogService();
 
-        var kafkaService = new KafkaService(LogService.class.getSimpleName(), KafkaService.all_topics_ecommerce, logService::parse);
+        var kafkaService = new KafkaService<Order>(LogService.class.getSimpleName(),
+                                            Pattern.compile(KafkaService.all_topics_ecommerce),
+                                            logService::parse);
         kafkaService.run();
 
     }
